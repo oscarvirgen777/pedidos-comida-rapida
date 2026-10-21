@@ -11,7 +11,7 @@ let systemName: string = "OscarVirgen's System";
 let version: number = 77.7;
 let userName: string = "OscarPC";
 
-// 4. Banner de bienvenida (concatenación + operación aritmética)
+// 4. Banner de bienvenida
 let proximaVersion: number = version + 0.1;
 
 console.log("==================================");
@@ -20,10 +20,68 @@ console.log("  ¡Bienvenido, " + userName + "!");
 console.log("  Próxima versión: v" + proximaVersion);
 console.log("==================================");
 
+// ==========================================
+// TIPO DE DATO
+// ==========================================
+interface Tarea {
+  id: number;
+  title: string;
+  completed: boolean;
+}
 
-let tareas: string[] = [];
+let tareas: Tarea[] = [
+  { id: 1, title: "Estudiar TypeScript", completed: true },
+  { id: 2, title: "Hacer ejercicio", completed: false },
+  { id: 3, title: "Leer un libro", completed: false },
+];
 
-// 4 y 5. Menú interactivo con ciclo
+let nextId: number = 4;
+
+// ==========================================
+// NUEVAS FUNCIONES (métodos funcionales)
+// ==========================================
+
+const markCompleted = (id: number): void => {
+  const tarea = tareas.find((t) => t.id === id);
+  if (tarea) {
+    tarea.completed = true;
+    console.log(`✅ Tarea "${tarea.title}" marcada como completada.`);
+  } else {
+    console.log(`❌ No se encontró ninguna tarea con id ${id}.`);
+  }
+};
+
+const filterPending = (): Tarea[] => {
+  return tareas.filter((t) => t.completed === false);
+};
+
+const filterCompleted = (): Tarea[] => {
+  return tareas.filter((t) => t.completed === true);
+};
+
+// ==========================================
+// listTasks (desestructuración + map + forEach)
+// ==========================================
+const listTasks = (): void => {
+  if (tareas.length === 0) {
+    console.log("📭 No hay tareas registradas.");
+    return;
+  }
+
+  const tareasFormateadas: string[] = tareas.map((task) => {
+    const { id, title, completed } = task; // desestructuración
+    const estado = completed ? "✅" : "❌";
+    return `[${id}] ${estado} ${title}`;
+  });
+
+  tareasFormateadas.forEach((linea) => {
+    console.log(linea);
+  });
+};
+
+// ==========================================
+// MENÚ
+// ==========================================
 let salir: boolean = false;
 
 while (!salir) {
@@ -31,37 +89,59 @@ while (!salir) {
   console.log("1. Agregar tarea");
   console.log("2. Eliminar última tarea");
   console.log("3. Listar tareas");
-  console.log("4. Salir");
+  console.log("4. Marcar como completada");
+  console.log("5. Ver solo pendientes");
+  console.log("6. Ver solo completadas");
+  console.log("7. Salir");
   console.log("====================================");
 
-  const opcion: string = await rl.question("Elige una opción (1-4): ");
+  const opcion: string = await rl.question("Elige una opción (1-7): ");
 
   if (opcion === "1") {
     const titulo: string = await rl.question("Título de la tarea: ");
-    tareas.push(titulo);
+    tareas.push({ id: nextId, title: titulo, completed: false });
+    nextId++;
     console.log(`✅ Tarea "${titulo}" agregada.`);
   } else if (opcion === "2") {
     if (tareas.length === 0) {
       console.log("⚠️ No hay tareas para eliminar.");
     } else {
-      const eliminada: string = tareas.pop() as string;
-      console.log(`🗑️ Tarea eliminada: "${eliminada}"`);
+      const eliminada: Tarea = tareas.pop() as Tarea;
+      console.log(`🗑️ Tarea eliminada: "${eliminada.title}"`);
     }
   } else if (opcion === "3") {
-    if (tareas.length === 0) {
-      console.log("📭 No hay tareas registradas.");
-    } else {
-      console.log("\n📋 Tareas:");
-      for (let i = 0; i < tareas.length; i++) {
-        console.log(`  ${i + 1}. ${tareas[i]}`);
-      }
-    }
+    listTasks();
   } else if (opcion === "4") {
+    const idStr: string = await rl.question("Ingresá el id de la tarea: ");
+    markCompleted(parseInt(idStr));
+  } else if (opcion === "5") {
+    const pendientes = filterPending();
+    if (pendientes.length === 0) {
+      console.log("🎉 No hay tareas pendientes.");
+    } else {
+      console.log("\n📋 Pendientes:");
+      pendientes.forEach((t) => {
+        const { id, title } = t;
+        console.log(`  [${id}] ❌ ${title}`);
+      });
+    }
+  } else if (opcion === "6") {
+    const completadas = filterCompleted();
+    if (completadas.length === 0) {
+      console.log("No hay tareas completadas.");
+    } else {
+      console.log("\n📋 Completadas:");
+      completadas.forEach((t) => {
+        const { id, title } = t;
+        console.log(`  [${id}] ✅ ${title}`);
+      });
+    }
+  } else if (opcion === "7") {
     salir = true;
     console.log("Hasta luego");
   } else {
     console.log("❌ Opción inválida. Intenta de nuevo.");
   }
-}
+}   
 // 🚫 No eliminar las líneas de abajo ⬇️
 rl.close();
