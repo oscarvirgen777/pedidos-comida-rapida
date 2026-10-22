@@ -118,20 +118,10 @@ while (!salir) {
   } else if (opcion === "3") {
     listTasks();
 
-    /* agregue la opcion para poder ver las tareas que se pueden completar con la funcion foreach  */
 } else if (opcion === "4") {
-  const pendientes = filterPending();
-  if (pendientes.length === 0) {
-    console.log("🎉 No hay tareas pendientes para marcar.");
-  } else {
-    console.log("\n📋 Tareas pendientes:");
-    pendientes.forEach((t) => {
-      const { id, title } = t;
-      console.log(`  [${id}] ${title}`);
-    });
-    const idStr: string = await rl.question("Ingresá el id de la tarea a completar: ");
-    markCompleted(parseInt(idStr));
-  }
+  const idStr: string = await rl.question("Ingresá el id de la tarea: ");
+  markCompleted(parseInt(idStr));
+  
   } else if (opcion === "5") {
     const pendientes = filterPending();
     if (pendientes.length === 0) {
