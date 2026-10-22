@@ -113,7 +113,7 @@ while (!salir) {
   if (opcion === "1") {
     const titulo: string = await rl.question("Título de la tarea: ");
     addTask(titulo);
-  } else if (opcion === "2") {3
+  } else if (opcion === "2") {
     removeTask();
   } else if (opcion === "3") {
     listTasks();
@@ -132,7 +132,6 @@ while (!salir) {
     const idStr: string = await rl.question("Ingresá el id de la tarea a completar: ");
     markCompleted(parseInt(idStr));
   }
-
   } else if (opcion === "5") {
     const pendientes = filterPending();
     if (pendientes.length === 0) {
