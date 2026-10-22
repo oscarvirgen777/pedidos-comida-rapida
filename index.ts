@@ -41,6 +41,7 @@ let nextId: number = 4;
 // NUEVAS FUNCIONES (métodos funcionales)
 // ==========================================
 
+
 const markCompleted = (id: number): void => {
   const tarea = tareas.find((t) => t.id === id);
   if (tarea) {
@@ -62,22 +63,21 @@ const filterCompleted = (): Tarea[] => {
 // ==========================================
 // listTasks (desestructuración + map + forEach)
 // ==========================================
-const listTasks = (): void => {
+const addTask = (title: string): void => {
+  tareas.push({ id: nextId, title: title, completed: false });
+  nextId++;
+  console.log(`✅ Tarea "${title}" agregada.`);
+};
+
+const removeTask = (): void => {
   if (tareas.length === 0) {
-    console.log("📭 No hay tareas registradas.");
+    console.log("⚠️ No hay tareas para eliminar.");
     return;
   }
-
-  const tareasFormateadas: string[] = tareas.map((task) => {
-    const { id, title, completed } = task; // desestructuración
-    const estado = completed ? "✅" : "❌";
-    return `[${id}] ${estado} ${title}`;
-  });
-
-  tareasFormateadas.forEach((linea) => {
-    console.log(linea);
-  });
+  const eliminada: Tarea = tareas.pop() as Tarea;
+  console.log(`🗑️ Tarea eliminada: "${eliminada.title}"`);
 };
+
 
 // ==========================================
 // MENÚ
@@ -95,6 +95,24 @@ while (!salir) {
   console.log("7. Salir");
   console.log("====================================");
 
+
+  const listTasks = (): void => {
+  if (tareas.length === 0) {
+    console.log("📭 No hay tareas registradas.");
+    return;
+  }
+
+  const tareasFormateadas: string[] = tareas.map((task) => {
+    const { id, title, completed } = task;
+    const estado = completed ? "completed" : "pending";
+    return `[${id}] ${title} - ${estado}`;
+  });
+
+  tareasFormateadas.forEach((linea) => {
+    console.log(linea);
+  });
+};   
+
   const opcion: string = await rl.question("Elige una opción (1-7): ");
 
   if (opcion === "1") {
@@ -109,11 +127,24 @@ while (!salir) {
       const eliminada: Tarea = tareas.pop() as Tarea;
       console.log(`🗑️ Tarea eliminada: "${eliminada.title}"`);
     }
-  } else if (opcion === "3") {
-    listTasks();
-  } else if (opcion === "4") {
-    const idStr: string = await rl.question("Ingresá el id de la tarea: ");
+// ✅ Debería ser:
+} else if (opcion === "3") {
+  listTasks();   
+/* agregue esto al codigo para que al momento de querer marcar como completada una tarea nos muestre las tareas pendientes que hay y asi ver que tarea estaremos marcando como completadas */
+
+} else if (opcion === "4") {
+  const pendientes = filterPending();
+  if (pendientes.length === 0) {
+    console.log("🎉 No hay tareas pendientes para marcar.");
+  } else {
+    console.log("\n📋 Tareas pendientes:");
+    pendientes.forEach((t) => {
+      const { id, title } = t;
+      console.log(`  [${id}] ${title}`);
+    });
+    const idStr: string = await rl.question("Ingresá el id de la tarea a completar: ");
     markCompleted(parseInt(idStr));
+  }
   } else if (opcion === "5") {
     const pendientes = filterPending();
     if (pendientes.length === 0) {
