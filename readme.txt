@@ -1,6 +1,3 @@
-# 🍔 API REST – Pedidos de Comida Rápida
-
-API REST en TypeScript para gestión de pedidos. Base de datos simulada en memoria.
 
 ## Interface
 
@@ -29,11 +26,5 @@ API REST en TypeScript para gestión de pedidos. Base de datos simulada en memor
 | 1 | GET | http://localhost:3000/api/pedidos | — | 200 – lista 3 pedidos |
 | 2 | GET | http://localhost:3000/api/pedidos/1 | — | 200 – Juan Pérez |
 | 3 | POST | http://localhost:3000/api/pedidos | `{"cliente":"Ana","platillo":"Quesadilla","total":75}` | 201 – ID 4 |
-| 4 | PUT | http://localhost:3000/api/pedidos/4 | `{"entregado":true}` | 200 – entregado: true |
-| 5 | DELETE | http://localhost:3000/api/pedidos/4 | — | 200 – cancelado |
-
-## Ejecutar
-
-```bash
-npm install
-npm start   
+| 4 | PUT | http://localhost:3000/api/pedidos/1 | `{ "entregado": true}` | 200 – entregado: true |
+| 5 | DELETE | http://localhost:3000/api/pedidos/2 | — | 200 – cancelado |
