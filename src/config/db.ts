@@ -8,4 +8,7 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
 });
 
-export default pool;   
+export const query = (text: string, params?: any[]) =>
+  pool.query(text, params);
+
+export default pool;

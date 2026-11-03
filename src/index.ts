@@ -2,6 +2,10 @@ import express, { type Request, type Response } from "express";
 import swaggerRouter from "./routes/swagger.router.js";
 import cors from "cors"
 import pool from './config/db.js';
+import customerRoutes from "../src/routes/customer.routes.js";
+import productRoutes from "../src/routes/product.routes.js";
+import saleRoutes from "../src/routes/sale.routes.js";
+import saleDetailRoutes from "../src/routes/sale_detail.routes.js";
 
 const port = process.env.PORT; 
 
@@ -12,6 +16,10 @@ const app = express();
 // Middlewares 
 app.use(express.json());
 app.use(cors())
+app.use("/api/customers", customerRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/sales", saleRoutes);
+app.use("/api/sale-details", saleDetailRoutes);
 
 app.use("/api/docs", swaggerRouter) 
 
