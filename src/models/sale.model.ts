@@ -1,45 +1,73 @@
-// src/models/sale.model.ts
-import { query } from "../config/db.js";
+import { pool } from "../config/db.js";
 
-export const SaleModel = {
-  findAll: async () => {
-    const { rows } = await query(
-      `SELECT s.*, c.nombre AS cliente
-       FROM sales s
-       JOIN customers c ON s.customers_id = c.id
-       ORDER BY s.id ASC`
+export async function getAllSales() {
+  const { rows } = await pool.query(
+    `SELECT s.*, c.name AS customer_name
+     FROM sales s
+     INNER JOIN customers c ON s.customer_id = c.id
+     ORDER BY s.created_at DESC`
+  );
+  return rows;
+}
+
+export async function getSaleById(id: number) {
+  const { rows } = await pool.query(
+    `SELECT s.*, c.name AS customer_name
+     FROM sales s
+     INNER JOIN customers c ON s.customer_id = c.id
+     WHERE s.id = $1`,
+    [id]
+  );
+  return rows[0] ?? null;
+}
+
+interface SaleItem {
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+}
+
+export async function createSaleWithItems(
+  customerId: number,
+  items: SaleItem[]
+) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const total = items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    const { rows: saleRows } = await client.query(
+      `INSERT INTO sales (customer_id, total) VALUES ($1, $2) RETURNING id`,
+      [customerId, total]
     );
-    return rows;
-  },
+    const saleId = saleRows[0].id;
 
-  findById: async (id: number | string) => {
-    const { rows } = await query(
-      `SELECT s.*, c.nombre AS cliente
-       FROM sales s
-       JOIN customers c ON s.customers_id = c.id
-       WHERE s.id = $1`, [id]
+    for (const item of items) {
+      await client.query(
+        `INSERT INTO sale_details (sale_id, product_id, quantity, unit_price)
+         VALUES ($1, $2, $3, $4)`,
+        [saleId, item.product_id, item.quantity, item.unit_price]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    const { rows } = await client.query(
+      `SELECT s.*, c.name AS customer_name
+       FROM sales s INNER JOIN customers c ON s.customer_id = c.id
+       WHERE s.id = $1`,
+      [saleId]
     );
-    return rows[0] || null;
-  },
-
-  create: async (customers_id: number, fecha: any, total: number) => {
-    const { rows } = await query(
-      "INSERT INTO sales (customers_id, fecha, total) VALUES ($1, $2, $3) RETURNING *",
-      [customers_id, fecha || new Date(), total]
+    const { rows: detailRows } = await client.query(
+      `SELECT * FROM sale_details WHERE sale_id = $1`,
+      [saleId]
     );
-    return rows[0];
-  },
 
-  update: async (id: number | string, customers_id: number, fecha: any, total: number) => {
-    const { rows } = await query(
-      "UPDATE sales SET customers_id = $1, fecha = $2, total = $3 WHERE id = $4 RETURNING *",
-      [customers_id, fecha, total, id]
-    );
-    return rows[0] || null;
-  },
-
-  delete: async (id: number | string) => {
-    const { rows } = await query("DELETE FROM sales WHERE id = $1 RETURNING *", [id]);
-    return rows[0] || null;
-  },
-};   
+    return { sale: rows[0], items: detailRows };
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+}   

@@ -1,9 +1,23 @@
-// src/models/product.model.ts
-import { query } from "../config/db.js";
+import { query, pool } from "../config/db.js";
 
 export const ProductModel = {
-  findAll: async () => {
-    const { rows } = await query("SELECT * FROM products ORDER BY id ASC");
+  findAll: async (maxPrice?: number, page?: number, limit?: number) => {
+    let sql = "SELECT * FROM products";
+    const params: (string | number)[] = [];
+
+    if (maxPrice !== undefined) {
+      params.push(maxPrice);
+      sql += ` WHERE precio <= $${params.length}`;
+    }
+
+    sql += " ORDER BY id ASC";
+
+    const lim = limit ?? 10;
+    const offset = ((page ?? 1) - 1) * lim;
+    params.push(lim, offset);
+    sql += ` LIMIT $${params.length - 1} OFFSET $${params.length}`;
+
+    const { rows } = await query(sql, params);
     return rows;
   },
 

@@ -1,7 +1,7 @@
 import express, { type Request, type Response } from "express"; 
 import swaggerRouter from "./routes/swagger.router.js";
 import cors from "cors"
-import pool from './config/db.js';
+import { pool } from './config/db.js';
 import customerRoutes from "../src/routes/customer.routes.js";
 import productRoutes from "../src/routes/product.routes.js";
 import saleRoutes from "../src/routes/sale.routes.js";
